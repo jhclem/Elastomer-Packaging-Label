@@ -106,7 +106,7 @@
         }
 
         /* Part Number Styling */
-        .part-number {
+        .PO-LI {
             font-size: 20px;
             font-weight: bold;
             color: #000;
@@ -300,9 +300,9 @@
                             </div>
                         </div>
                         <div class="PO-LI">${escapeHtml(poLi)}</div>
-                        <div class="Batch #">${escapeHtml(batchNo)}</div>
+                        <div class="batch-no">${escapeHtml(batchNo)}</div>
                         <div class="cureDate-sn-row">
-                            <div class="Cure/MFG Date">${cureDate ? `WO: ${escapeHtml(cureDate)}` : ''}</div>
+                            <div class="cure-date">${cureDate ? `WO: ${escapeHtml(cureDate)}` : ''}</div>
                             <div class="sn-right">${cureDate ? `SN/Batch: ${escapeHtml(cureDate)}` : ''}</div>
                         </div>
                         <div class="label-footer">
@@ -310,7 +310,7 @@
                                 <span><strong>Shelf Life:</strong> ${escapeHtml(shelfLife)}</span>
                                 ${resItem ? `<span><strong>RES. ITEM:</strong> ${escapeHtml(resItem)}</span>` : '<span></span>'}
                             </div>
-                            ${date ? `<span><strong>Expiry Date:</strong> ${escapeHtml(expiryDate)}</span>` : ''}
+                            ${expiryDate ? `<span><strong>Expiry Date:</strong> ${escapeHtml(expiryDate)}</span>` : ''}
                         </div>
                     `;
                     
