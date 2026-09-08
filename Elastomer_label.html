@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WH Issuing Label Printer</title>
+    <style>
+        
+        /* --- UI Styles (Visible on Screen Only) --- */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f4f4f9;
+            color: #333;
+        }
+        .controls {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        textarea {
+            width: 100%;
+            height: 140px;
+            margin-bottom: 12px;
+            box-sizing: border-box;
+            padding: 10px;
+            font-family: monospace;
+            resize: vertical;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .options {
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        .options label {
+            font-size: 14px;
+            cursor: pointer;
+            user-select: none;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            margin-right: 10px;
+            font-weight: bold;
+        }
+        button:hover { background-color: #0056b3; }
+        button.print-btn { background-color: #28a745; }
+        button.print-btn:hover { background-color: #218838; }
+
+        /* --- Live Preview Styles --- */
+        #preview-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            background: #ddd;
+            padding: 20px;
+            border-radius: 8px;
+        }
+
+        /* 4" x 2" Label Template Dimensions */
+        .label {
+            background: white;
+            width: 4in;          /* Target Width */
+            height: 2in;         /* Target Height */
+            padding: 0.12in;
+            box-sizing: border-box;
+            border: 1px dashed #999;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+        }
+
+        /* Header with Logo + Entity Name (Left) and QR Code (Right) */
+        .label-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between; /* Pushes QR code to top-right corner */
+            margin-bottom: 4px;
+        }
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .logo {
+            height: 33px;
+            width: auto;
+            object-fit: contain;
+        }
+        .entity-name {
+            font-size: 12px;
+            font-weight: bold;
+            color: #111;
+            letter-spacing: 0.5px;
+        }
+        .qr-code-img {
+            height: 40px;
+            width: 40px;
+            object-fit: contain;
+        }
+
+        /* Part Number Styling */
+        .part-number {
+            font-size: 20px;
+            font-weight: bold;
+            color: #000;
+            border-bottom: 2px solid #000;
+            padding-bottom: 2px;
+            margin-bottom: 4px;
+            word-break: break-all;
+        }
+
+        /* Max 2 Lines Description with Truncation */
+        .description {
+            font-size: 12px;
+            color: #222;
+            line-height: 1.2;
+            max-height: 2.4em; /* Exactly 2 lines */
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            word-wrap: break-word;
+            margin-bottom: 4px;
+        }
+
+        /* WO & SN/Batch Combined Row (Priority Layering) */
+        .wo-sn-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            font-size: 12px;
+            font-weight: bold;
+            color: #000;
+            margin-bottom: 4px;
+            background: white;
+            position: relative;
+            z-index: 10;
+        }
+        .wo-left {
+            flex-shrink: 0;
+        }
+        .sn-right {
+            text-align: right;
+            word-wrap: break-word;
+            white-space: pre-line;
+            max-width: 55%;
+        }
+
+        /* Footer Layout with 12px Font */
+        .label-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+            color: #222;
+            border-top: 1px solid #ccc;
+            padding-top: 3px;
+            position: relative;
+            z-index: 10;
+        }
+        .footer-left {
+            display: flex;
+            gap: 12px;
+        }
+
+        /* --- Print Styles --- */
+        @media print {
+            .controls, h2 {
+                display: none !important;
+            }
+            body {
+                margin: 0;
+                background: none;
+            }
+            #preview-container {
+                padding: 0;
+                background: none;
+                display: block;
+            }
+            .label {
+                border: none;
+                page-break-after: always;
+                break-after: page;
+                width: 4in;
+                height: 2in;
+            }
+            img {
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+        }
+
+        @page {
+            size: 4in 2in;
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="controls">
+        <h2>WH Issuing Label Generator</h2>
+        <p>Paste directly from Excel (Format: <strong>[Res. Item] | PN | Desc | Qty | WO | Date | SN / Batch</strong>):</p>
+        <textarea id="data-input" placeholder="Copy rows from Excel and paste them here directly..." oninput="generateLabels()"></textarea>
+        
+        <div class="options">
+            <label>
+                <input type="checkbox" id="multiply-qty" onchange="generateLabels()"> 
+                Print multiple sticker copies based on <strong>Qty</strong> column
+            </label>
+        </div>
+
+        <button onclick="generateLabels()">Refresh Layout</button>
+        <button class="print-btn" onclick="window.print()">Print Labels</button>
+    </div>
+
+    <h2>Layout Viewer</h2>
+    <div id="preview-container">
+        <!-- Default sample preview -->
+        <div class="label">
+            <div class="label-header">
+                <div class="header-left">
+                    <img class="logo" alt="SLB Logo" src="https://slb.widen.net/content/mqqr1tincc/jpeg/SLB_Logo_Black_R.jpeg?w=640&keep=c&crop=yes&quality=80&x.portal_shortcode_generated=fp1w1w0f&x.app=portals">
+                    <span class="entity-name">BTTC CAM A425</span>
+                </div>
+                <img class="qr-code-img" alt="QR Code" src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=SAMPLE-PN_1_BATCH-001">
+            </div>
+            <div class="part-number">SAMPLE-PN</div>
+            <div class="description">Paste your Excel data above to view formatted stickers with the logo, QR code, WO, and Res Item automatically.</div>
+            <div class="wo-sn-row">
+                <div class="wo-left">WO: 123456789012</div>
+                <div class="sn-right">SN/Batch: BATCH-001</div>
+            </div>
+            <div class="label-footer">
+                <div class="footer-left">
+                    <span><strong>QTY:</strong> 1</span>
+                    <span><strong>RES. ITEM:</strong> 14</span>
+                </div>
+                <span><strong>DATE:</strong> Thursday, July 23, 2026</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const LOGO_URL = "https://slb.widen.net/content/mqqr1tincc/jpeg/SLB_Logo_Black_R.jpeg?w=640&keep=c&crop=yes&quality=80&x.portal_shortcode_generated=fp1w1w0f&x.app=portals";
+
+        function generateLabels() {
+            const input = document.getElementById('data-input').value;
+            const container = document.getElementById('preview-container');
+            const multiplyByQty = document.getElementById('multiply-qty').checked;
+            
+            container.innerHTML = '';
+            
+            const lines = input.split(/\r?\n/);
+            
+            lines.forEach((line, index) => {
+                if (line.trim() === '') return;
+                
+                // Excel separates columns with Tab (\t)
+                let cols = line.split('\t');
+                
+                // Fallback to comma if no tabs detected
+                if (cols.length === 1 && line.includes(',')) {
+                    cols = line.split(',');
+                }
+                
+                cols = cols.map(col => col.trim());
+
+                // Auto-skip header row if present
+                if (index === 0 && isHeaderRow(cols)) {
+                    return;
+                }
+
+                let resItem = '', pn = '', desc = '', qty = '', wo = '', date = '', snBatch = '';
+                const isFirstColPN = cols[0] && cols[0].length > 3;
+
+                if (isFirstColPN) {
+                    pn      = cols[0] || '';
+                    desc    = cols[1] || '';
+                    qty     = cols[2] || '';
+                    wo      = cols[3] || '';
+                    date    = cols[4] || '';
+                    snBatch = cols[5] || '';
+                } else {
+                    resItem = cols[0] || '';
+                    pn      = cols[1] || '';
+                    desc    = cols[2] || '';
+                    qty     = cols[3] || '';
+                    wo      = cols[4] || '';
+                    date    = cols[5] || '';
+                    snBatch = cols[6] || '';
+                }
+
+                // Generate QR String: PN_QTY_SN/BATCH
+                const qrValue = `${pn}_${qty}_${snBatch}`;
+                const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(qrValue)}`;
+
+                // Quantity duplication handler
+                let copies = 1;
+                if (multiplyByQty) {
+                    const parsedQty = Math.floor(parseFloat(qty));
+                    if (!isNaN(parsedQty) && parsedQty > 0) {
+                        copies = Math.min(parsedQty, 200); 
+                    }
+                }
+
+                for (let i = 0; i < copies; i++) {
+                    const labelDiv = document.createElement('div');
+                    labelDiv.className = 'label';
+                    
+                    labelDiv.innerHTML = `
+                        <div class="label-header">
+                            <div class="header-left">
+                                <img class="logo" alt="SLB Logo" src="${LOGO_URL}">
+                                <span class="entity-name">BTTC CAM A425</span>
+                            </div>
+                            <img class="qr-code-img" alt="QR Code" src="${qrUrl}">
+                        </div>
+                        <div class="part-number">${escapeHtml(pn)}</div>
+                        <div class="description">${escapeHtml(desc)}</div>
+                        <div class="wo-sn-row">
+                            <div class="wo-left">${wo ? `WO: ${escapeHtml(wo)}` : ''}</div>
+                            <div class="sn-right">${snBatch ? `SN/Batch: ${escapeHtml(snBatch)}` : ''}</div>
+                        </div>
+                        <div class="label-footer">
+                            <div class="footer-left">
+                                ${qty ? `<span><strong>QTY:</strong> ${escapeHtml(qty)}</span>` : '<span></span>'}
+                                ${resItem ? `<span><strong>RES. ITEM:</strong> ${escapeHtml(resItem)}</span>` : '<span></span>'}
+                            </div>
+                            ${date ? `<span><strong>DATE:</strong> ${escapeHtml(date)}</span>` : ''}
+                        </div>
+                    `;
+                    
+                    container.appendChild(labelDiv);
+                }
+            });
+        }
+
+        function isHeaderRow(cols) {
+            const rowText = cols.join(' ').toLowerCase();
+            return rowText.includes('res') || rowText.includes('item') || rowText.includes('pn') || rowText.includes('desc') || rowText.includes('wo') || rowText.includes('sn');
+        }
+
+        function escapeHtml(text) {
+            return text
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+    </script>
+</body>
+</html>
