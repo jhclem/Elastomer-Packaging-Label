@@ -231,11 +231,11 @@
                     <span class="entity-name">BTTC CAM A425</span>
                 </div>
             </div>
-            <div class="part-number">SAMPLE-PN</div>
-            <div class="description">Paste your Excel data above to view formatted stickers with the logo, QR code, WO, and Res Item automatically.</div>
+            <div class="part-number">PO-LI</div>
+            <div class="description">Paste your Excel data above to view formatted stickers below.</div>
             <div class="wo-sn-row">
-                <div class="wo-left">WO: 123456789012</div>
-                <div class="sn-right">SN/Batch: BATCH-001</div>
+                <div class="wo-left">Shelf Life: 12345</div>
+                <div class="sn-right">Cure Date/MFG Date: 12345</div>
             </div>
             <div class="label-footer">
                 <div class="footer-left">
@@ -312,7 +312,7 @@
                         <div class="Batch #">${escapeHtml(batchNo)}</div>
                         <div class="cureDate-sn-row">
                             <div class="Cure/MFG Date">${cureDate ? `WO: ${escapeHtml(cureDate)}` : ''}</div>
-                            <div class="sn-right">${snBatch ? `SN/Batch: ${escapeHtml(snBatch)}` : ''}</div>
+                            <div class="sn-right">${cureDate ? `SN/Batch: ${escapeHtml(cureDate)}` : ''}</div>
                         </div>
                         <div class="label-footer">
                             <div class="footer-left">
