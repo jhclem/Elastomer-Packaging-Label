@@ -209,13 +209,6 @@
         <h2>WH Elastomer Label Generator</h2>
         <p>Paste directly from Excel (Format: <strong>[Res. Item] | PO-LI | Batch # | Cure Date/MFG Date | Shelf Life | Expiry Date | SN </strong>):</p>
         <textarea id="data-input" placeholder="Copy rows from Excel and paste them here directly..." oninput="generateLabels()"></textarea>
-        
-        <div class="options">
-            <label>
-                <input type="checkbox" id="multiply-qty" onchange="generateLabels()"> 
-                Print multiple sticker copies based on <strong>Qty</strong> column
-            </label>
-        </div>
 
         <button onclick="generateLabels()">Refresh Layout</button>
         <button class="print-btn" onclick="window.print()">Print Labels</button>
@@ -253,7 +246,6 @@
         function generateLabels() {
             const input = document.getElementById('data-input').value;
             const container = document.getElementById('preview-container');
-            const multiplyByQty = document.getElementById('multiply-qty').checked;
             
             container.innerHTML = '';
             
@@ -297,7 +289,6 @@
                     snBatch = cols[6] || '';
                 }
 
-                for (let i = 0; i < copies; i++) {
                     const labelDiv = document.createElement('div');
                     labelDiv.className = 'label';
                     
@@ -316,7 +307,7 @@
                         </div>
                         <div class="label-footer">
                             <div class="footer-left">
-                                ${qty ? `<span><strong>Shelf Life:</strong> ${escapeHtml(shelfLife)}</span>` : '<span></span>'}
+                                <span><strong>Shelf Life:</strong> ${escapeHtml(shelfLife)}</span>
                                 ${resItem ? `<span><strong>RES. ITEM:</strong> ${escapeHtml(resItem)}</span>` : '<span></span>'}
                             </div>
                             ${date ? `<span><strong>Expiry Date:</strong> ${escapeHtml(expiryDate)}</span>` : ''}
@@ -324,7 +315,6 @@
                     `;
                     
                     container.appendChild(labelDiv);
-                }
             });
         }
 
