@@ -299,16 +299,14 @@
                                 <span class="entity-name">BTTC CAM A425</span>
                             </div>
                         </div>
-                        <div class="PO-LI">${escapeHtml(poLi)}</div>
-                        <div class="batch-no">${escapeHtml(batchNo)}</div>
-                        <div class="cureDate-sn-row">
-                            <div class="cure-date">${cureDate ? `WO: ${escapeHtml(cureDate)}` : ''}</div>
-                            <div class="sn-right">${cureDate ? `SN/Batch: ${escapeHtml(cureDate)}` : ''}</div>
+                        <div class="part-number">${escapeHtml(poLi)}</div>
+                        <div class="description">${escapeHtml(batchNo)}</div>
+                        <div class="wo-sn-row">
+                            <div class="wo-left">${cureDate ? `Cure Date: ${escapeHtml(cureDate)}` : ''}</div>
                         </div>
                         <div class="label-footer">
                             <div class="footer-left">
                                 <span><strong>Shelf Life:</strong> ${escapeHtml(shelfLife)}</span>
-                                ${resItem ? `<span><strong>RES. ITEM:</strong> ${escapeHtml(resItem)}</span>` : '<span></span>'}
                             </div>
                             ${expiryDate ? `<span><strong>Expiry Date:</strong> ${escapeHtml(expiryDate)}</span>` : ''}
                         </div>
