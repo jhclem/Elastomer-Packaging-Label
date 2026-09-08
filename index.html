@@ -297,16 +297,6 @@
                     snBatch = cols[6] || '';
                 }
 
-
-                // Quantity duplication handler
-                let copies = 1;
-                if (multiplyByQty) {
-                    const parsedQty = Math.floor(parseFloat(qty));
-                    if (!isNaN(parsedQty) && parsedQty > 0) {
-                        copies = Math.min(parsedQty, 200); 
-                    }
-                }
-
                 for (let i = 0; i < copies; i++) {
                     const labelDiv = document.createElement('div');
                     labelDiv.className = 'label';
@@ -317,20 +307,19 @@
                                 <img class="logo" alt="SLB Logo" src="${LOGO_URL}">
                                 <span class="entity-name">BTTC CAM A425</span>
                             </div>
-                            <img class="qr-code-img" alt="QR Code" src="${qrUrl}">
                         </div>
-                        <div class="part-number">${escapeHtml(pn)}</div>
-                        <div class="description">${escapeHtml(desc)}</div>
-                        <div class="wo-sn-row">
-                            <div class="wo-left">${wo ? `WO: ${escapeHtml(wo)}` : ''}</div>
+                        <div class="PO-LI">${escapeHtml(poLi)}</div>
+                        <div class="Batch #">${escapeHtml(batchNo)}</div>
+                        <div class="cureDate-sn-row">
+                            <div class="Cure/MFG Date">${cureDate ? `WO: ${escapeHtml(cureDate)}` : ''}</div>
                             <div class="sn-right">${snBatch ? `SN/Batch: ${escapeHtml(snBatch)}` : ''}</div>
                         </div>
                         <div class="label-footer">
                             <div class="footer-left">
-                                ${qty ? `<span><strong>QTY:</strong> ${escapeHtml(qty)}</span>` : '<span></span>'}
+                                ${qty ? `<span><strong>Shelf Life:</strong> ${escapeHtml(shelfLife)}</span>` : '<span></span>'}
                                 ${resItem ? `<span><strong>RES. ITEM:</strong> ${escapeHtml(resItem)}</span>` : '<span></span>'}
                             </div>
-                            ${date ? `<span><strong>DATE:</strong> ${escapeHtml(date)}</span>` : ''}
+                            ${date ? `<span><strong>Expiry Date:</strong> ${escapeHtml(expiryDate)}</span>` : ''}
                         </div>
                     `;
                     
