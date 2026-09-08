@@ -104,11 +104,6 @@
             color: #111;
             letter-spacing: 0.5px;
         }
-        .qr-code-img {
-            height: 40px;
-            width: 40px;
-            object-fit: contain;
-        }
 
         /* Part Number Styling */
         .part-number {
@@ -211,8 +206,8 @@
 <body>
 
     <div class="controls">
-        <h2>WH Issuing Label Generator</h2>
-        <p>Paste directly from Excel (Format: <strong>[Res. Item] | PN | Desc | Qty | WO | Date | SN / Batch</strong>):</p>
+        <h2>WH Elastomer Label Generator</h2>
+        <p>Paste directly from Excel (Format: <strong>[Res. Item] | PO-LI | Batch # | Cure Date/MFG Date | Shelf Life | Expiry Date | SN </strong>):</p>
         <textarea id="data-input" placeholder="Copy rows from Excel and paste them here directly..." oninput="generateLabels()"></textarea>
         
         <div class="options">
@@ -235,7 +230,6 @@
                     <img class="logo" alt="SLB Logo" src="https://slb.widen.net/content/mqqr1tincc/jpeg/SLB_Logo_Black_R.jpeg?w=640&keep=c&crop=yes&quality=80&x.portal_shortcode_generated=fp1w1w0f&x.app=portals">
                     <span class="entity-name">BTTC CAM A425</span>
                 </div>
-                <img class="qr-code-img" alt="QR Code" src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=SAMPLE-PN_1_BATCH-001">
             </div>
             <div class="part-number">SAMPLE-PN</div>
             <div class="description">Paste your Excel data above to view formatted stickers with the logo, QR code, WO, and Res Item automatically.</div>
@@ -283,29 +277,26 @@
                     return;
                 }
 
-                let resItem = '', pn = '', desc = '', qty = '', wo = '', date = '', snBatch = '';
+                let resItem = '', poLi = '', batchNo = '', cureDate = '', shelfLife = '', expiryDate = '', snBatch = '';
                 const isFirstColPN = cols[0] && cols[0].length > 3;
 
                 if (isFirstColPN) {
-                    pn      = cols[0] || '';
-                    desc    = cols[1] || '';
-                    qty     = cols[2] || '';
-                    wo      = cols[3] || '';
-                    date    = cols[4] || '';
+                    poLi      = cols[0] || '';
+                    batchNo    = cols[1] || '';
+                    cureDate     = cols[2] || '';
+                    shelfLife      = cols[3] || '';
+                    expiryDate    = cols[4] || '';
                     snBatch = cols[5] || '';
                 } else {
                     resItem = cols[0] || '';
-                    pn      = cols[1] || '';
-                    desc    = cols[2] || '';
-                    qty     = cols[3] || '';
-                    wo      = cols[4] || '';
-                    date    = cols[5] || '';
+                    poLi      = cols[1] || '';
+                    batchNo    = cols[2] || '';
+                    cureDate     = cols[3] || '';
+                    shelfLife      = cols[4] || '';
+                    expiryDate    = cols[5] || '';
                     snBatch = cols[6] || '';
                 }
 
-                // Generate QR String: PN_QTY_SN/BATCH
-                const qrValue = `${pn}_${qty}_${snBatch}`;
-                const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(qrValue)}`;
 
                 // Quantity duplication handler
                 let copies = 1;
@@ -350,7 +341,7 @@
 
         function isHeaderRow(cols) {
             const rowText = cols.join(' ').toLowerCase();
-            return rowText.includes('res') || rowText.includes('item') || rowText.includes('pn') || rowText.includes('desc') || rowText.includes('wo') || rowText.includes('sn');
+            return rowText.includes('po') || rowText.includes('batch') || rowText.includes('cure') || rowText.includes('mfg') || rowText.includes('shelf') || rowText.includes('expiry') || rowText.includes('sn');
         }
 
         function escapeHtml(text) {
